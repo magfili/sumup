@@ -13,6 +13,7 @@ Please add an executive summary with the support performance and how best/worst 
 - Chat is_resolved flag: this flag is not reliable before December as all the interactions are marked as resolved.
 - Chat AHT: interaction_handling_time and interaction_response_time is null for chats up till the end of July.  
 - Email resolution and handling times: it's not clear to me how the email interactions work and if those are always only inbound emails. I suspect that handling time is calculated as time difference between received timestamp and response sent timestamp, which does not reflect actual time spent working on a response since it doesn't exclude time in backlog. In an ideal world, I would try to better understand how handling time is calculated and work with operations teams on improving the tracking of actual time spent by agents on resolving the email contacts.
+- Emails contain possible duplicates (different interaction id but same values for all the other fields). I excluded those interactions from the dataset.
   
 # Answers
 1. Resolution window target should move to 2 days.
