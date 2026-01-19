@@ -5,6 +5,26 @@ library(ggplot2)
 setwd("C:/Users/Lenovo/Downloads/")
 dt <- read.csv("case_study_data_lead_ops.csv")
 
+# Exclude duplicated emails
+dt <- sqldf("
+SELECT
+*
+FROM dt
+  GROUP BY
+    AGENT_ID,
+    MERCHANT_CODE,
+    AGENT_COMPANY,
+    MERCHANT_COUNTRY,
+    IS_RESOLVING_INTERACTION,
+    CLASSIFICATION_PRODUCT,
+    MCC_GROUP,
+    INTERACTION_RESPONSE_TIME,
+    INTERACTION_HANDLING_TIME,
+    CREATED_DATE
+  HAVING count(INTERACTION_ID) = 1
+")
+
+
 ##### Q1: The resolution window is 7 days; we would like to optimise this timeframe. Recommend a new one and justify #####
 
 answer1 <- sqldf("
@@ -49,6 +69,7 @@ FROM lead
 GROUP BY date_diff
 ORDER BY date_diff ASC
                  ")
+
 ## Download results as csv for visualizations
 write.csv(answer1, "answer1_results.csv", row.names = FALSE)
 
@@ -106,7 +127,7 @@ count(INTERACTION_ID) * 1.0/count(distinct merchant_code) as interactions_per_me
 ##### Q3: Which Agent Company performed the best? #####
 answer3 <- sqldf("SELECT 
 AGENT_COMPANY,
-
+interaction_channel,
 count(INTERACTION_ID) as interaction_count,
 count(distinct AGENT_ID) as agents_count,
 SUM(CASE WHEN IS_RESOLVING_INTERACTION = 'true' THEN 1 ELSE 0 END) AS resolved_count,
@@ -115,7 +136,7 @@ SUM(CASE WHEN IS_RESOLVING_INTERACTION = 'true' THEN 1 ELSE 0 END)
 avg(INTERACTION_HANDLING_TIME/60) AS AHT_min
                   FROM dt
                   WHERE merchant_code != 8817975702393619456
-                  GROUP BY AGENT_COMPANY")
+                  GROUP BY AGENT_COMPANY, interaction_channel")
 
 ## Download results as csv for visualizations
 write.csv(answer3, "answer3_results.csv", row.names = FALSE)
@@ -167,7 +188,6 @@ ORDER BY total_interactions DESC;
 write.csv(answer4.2, "answer4_results.csv", row.names = FALSE)
 
 ##### Q5: How would you associate costs with each channel? #####
-
 
 answer5 <- sqldf("
 SELECT
