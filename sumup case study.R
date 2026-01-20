@@ -7,21 +7,27 @@ dt <- read.csv("case_study_data_lead_ops.csv")
 
 # Exclude duplicated emails
 dt <- sqldf("
-SELECT
-*
-FROM dt
-  GROUP BY
-    AGENT_ID,
-    MERCHANT_CODE,
-    AGENT_COMPANY,
-    MERCHANT_COUNTRY,
-    IS_RESOLVING_INTERACTION,
-    CLASSIFICATION_PRODUCT,
-    MCC_GROUP,
-    INTERACTION_RESPONSE_TIME,
-    INTERACTION_HANDLING_TIME,
-    CREATED_DATE
-  HAVING count(INTERACTION_ID) = 1
+SELECT *
+FROM (
+  SELECT
+    *,
+    ROW_NUMBER() OVER (
+      PARTITION BY
+        AGENT_ID,
+        MERCHANT_CODE,
+        AGENT_COMPANY,
+        MERCHANT_COUNTRY,
+        IS_RESOLVING_INTERACTION,
+        CLASSIFICATION_PRODUCT,
+        MCC_GROUP,
+        INTERACTION_RESPONSE_TIME,
+        INTERACTION_HANDLING_TIME,
+        CREATED_DATE
+      ORDER BY INTERACTION_ID
+    ) AS rn
+  FROM dt
+)
+WHERE rn = 1
 ")
 
 
@@ -210,3 +216,4 @@ GROUP BY year_month
 ")
 
 write.csv(answer5, "answer5_results.csv", row.names = FALSE)
+
